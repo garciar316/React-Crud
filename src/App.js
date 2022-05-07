@@ -1,11 +1,12 @@
 import React, { useState, useReducer, useEffect } from 'react';
-import UserTable from "./components/user_table/UserTable";
 import { v4 as uuidv4 } from 'uuid';
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AddUSerForm from './components/add_user/AddUserForm';
-import EditUserForm from './components/edit_user/EditUserForm';
 import useLocalStorage from './context/useLocalStorage';
+import MyNavBar from './layout/MyNavBar';
 import { todoReducer } from './components/useReducer/reducer';
 import { crudActions } from './components/useReducer/actions';
+import ListUsers from './components/user_table/ListUsers';
 
 function App() {
 
@@ -14,65 +15,52 @@ function App() {
   });
   const [usersLocalStorage, setUsersLocalStorage] = useLocalStorage('users', []);
   const [users, dispatch] = useReducer(todoReducer, usersLocalStorage);
-  const [editing, setEditing] = useState(false);
 
   const addUser = (user) => {
     user.id = uuidv4();
-    dispatch({type: crudActions.ADD, payload: user});
+    dispatch({ type: crudActions.ADD, payload: user });
   }
 
   const deleteUser = (id) => {
-    dispatch({type: crudActions.DELETE, payload: id});
+    dispatch({ type: crudActions.DELETE, payload: id });
   }
 
   const editRow = (user) => {
-    setEditing(true);
     setCurrentUser({
       id: user.id, name: user.name, username: user.username
-    })
+    });
+    <BrowserRouter>
+      <Navigate replace to="/editar" />
+    </BrowserRouter>
   }
 
   const updateUser = (id, updatedUser) => {
-    setEditing(false);
     updatedUser.id = id;
-    dispatch({type: crudActions.EDIT, payload: updatedUser});
+    dispatch({ type: crudActions.EDIT, payload: updatedUser });
   }
 
   useEffect(() => {
     setUsersLocalStorage(users);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [users]);
 
   return (
-    <div className="container">
-      <h1>Crud App with Hooks</h1>
-      <div className="flex-row">
-        {
-          editing ?
-            <div className="flex-large">
-              <h2>Edit user</h2>
-              <EditUserForm
-                currentUser={currentUser}
-                updateUser={updateUser}
-              />
-            </div>
-            :
-            <div className="flex-large">
-              <h2>Add user</h2>
-              <AddUSerForm addUser={addUser} />
-            </div>
-        }
-
-        <div className="flex-large">
-          <h2>View user</h2>
-          <UserTable
-            users={users}
-            deleteUser={deleteUser}
-            editRow={editRow}
-          />
-        </div>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MyNavBar />}>
+          <Route index element={
+            <ListUsers
+              users={users}
+              deleteUser={deleteUser}
+              editRow={editRow}
+              updateUser={updateUser}
+              currentUser={currentUser}
+            />
+          } />
+          <Route path="agregar" element={<AddUSerForm addUser={addUser} />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
