@@ -3,19 +3,15 @@ import UserTable from "./components/UserTable";
 import { v4 as uuidv4 } from 'uuid';
 import AddUSerForm from './components/AddUserForm';
 import EditUserForm from './components/EditUserForm';
+import useLocalStorage from './context/useLocalStorage';
 
 function App() {
-  const usersData = [
-    { id: uuidv4(), name: 'Tania', username: 'floppydiskette' },
-    { id: uuidv4(), name: 'Craig', username: 'siliconeidolon' },
-    { id: uuidv4(), name: 'Ben', username: 'benisphere' }
-  ];
 
   const [currentUser, setCurrentUser] = useState({
     id: null, name: '', username: ''
   });
 
-  const [users, setUsers] = useState(usersData);
+  const [users, setUsers] = useLocalStorage('users', []);
 
   const [editing, setEditing] = useState(false);
 
