@@ -1,30 +1,28 @@
-import React, { useState } from 'react';
-import UserTable from "./components/UserTable";
+import React, { useState, useReducer, useEffect } from 'react';
+import UserTable from "./components/user_table/UserTable";
 import { v4 as uuidv4 } from 'uuid';
-import AddUSerForm from './components/AddUserForm';
-import EditUserForm from './components/EditUserForm';
+import AddUSerForm from './components/add_user/AddUserForm';
+import EditUserForm from './components/edit_user/EditUserForm';
 import useLocalStorage from './context/useLocalStorage';
+import { todoReducer } from './components/useReducer/reducer';
+import { crudActions } from './components/useReducer/actions';
 
 function App() {
 
   const [currentUser, setCurrentUser] = useState({
     id: null, name: '', username: ''
   });
-
-  const [users, setUsers] = useLocalStorage('users', []);
-
+  const [usersLocalStorage, setUsersLocalStorage] = useLocalStorage('users', []);
+  const [users, dispatch] = useReducer(todoReducer, usersLocalStorage);
   const [editing, setEditing] = useState(false);
 
   const addUser = (user) => {
     user.id = uuidv4();
-    setUsers([
-      ...users,
-      user
-    ]);
+    dispatch({type: crudActions.ADD, payload: user});
   }
 
   const deleteUser = (id) => {
-    setUsers(users.filter(user => user.id !== id));
+    dispatch({type: crudActions.DELETE, payload: id});
   }
 
   const editRow = (user) => {
@@ -36,8 +34,14 @@ function App() {
 
   const updateUser = (id, updatedUser) => {
     setEditing(false);
-    setUsers(users.map((user) => user.id === id ? updatedUser : user));
+    updatedUser.id = id;
+    dispatch({type: crudActions.EDIT, payload: updatedUser});
   }
+
+  useEffect(() => {
+    setUsersLocalStorage(users);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [users]);
 
   return (
     <div className="container">
