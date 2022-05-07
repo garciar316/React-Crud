@@ -1,11 +1,12 @@
+import {crudActions} from './actions';
 export const todoReducer = (state, action) => {
     const {type, payload} = action
     switch (type) {
-        case 'add':
+        case crudActions.ADD:
             return [...state, payload]
-        case 'delete':
+        case crudActions.DELETE:
             return state.filter((user) => user.id !== payload);
-        case 'edit':
+        case crudActions.EDIT:
             return state.map((user) => user.id === payload.id ? payload : user)
         default:
             break;
